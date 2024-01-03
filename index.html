@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+</head>
+<body>
+  <h1>Weather App</h1>
+  <label for="cityInput">Enter Cities (comma-separated):</label>
+  <input type="text" id="cityInput" placeholder="e.g., toronto, mumbai, london">
+  <button onclick="getWeather()">Get Weather</button>
+  <div id="weatherResults"></div>
+  <div id="errorContainer" style="color: red;"></div>
+
+  <script>
+    async function getWeather() {
+      try {
+        const cityInput = document.getElementById('cityInput').value;
+        const cities = cityInput.split(',').map(city => city.trim());
+
+        const response = await fetch('https://weatherapi-7atp.onrender.com/getWeather', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ cities }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        displayWeatherResults(data.weather);
+        clearError();
+      } catch (error) {
+        displayError(`Failed to fetch weather: ${error.message}`);
+      }
+    }
+
+    function displayWeatherResults(weather) {
+      const resultsDiv = document.getElementById('weatherResults');
+      resultsDiv.innerHTML = '';
+
+      for (const [city, temperature] of Object.entries(weather)) {
+        const resultElement = document.createElement('p');
+        resultElement.textContent = `${city}: ${temperature}`;
+        resultsDiv.appendChild(resultElement);
+      }
+    }
+
+    function displayError(errorMessage) {
+      const errorContainer = document.getElementById('errorContainer');
+      errorContainer.textContent = errorMessage;
+    }
+
+    function clearError() {
+      const errorContainer = document.getElementById('errorContainer');
+      errorContainer.textContent = '';
+    }
+  </script>
+</body>
+</html>
